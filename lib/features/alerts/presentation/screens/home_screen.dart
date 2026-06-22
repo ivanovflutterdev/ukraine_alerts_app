@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import 'package:ukraine_alerts_app/features/alerts/presentation/widgets/home_button.dart';
-import 'package:ukraine_alerts_app/features/alerts/presentation/screens/region_alerts_screen.dart';
 import 'package:ukraine_alerts_app/features/alerts/presentation/screens/alerts_map_screen.dart';
+import 'package:ukraine_alerts_app/features/alerts/presentation/screens/region_alerts_screen.dart';
+import 'package:ukraine_alerts_app/features/alerts/presentation/widgets/home_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
