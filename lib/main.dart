@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ukraine_alerts_app/core/di/service_locator.dart';
 import 'package:ukraine_alerts_app/features/alerts/presentation/screens/home_screen.dart';
 
-void main () {
+void main() {
+  setupServiceLocator();
+
   runApp(const UkraineAlertsApp());
 }
 
@@ -15,7 +18,7 @@ class UkraineAlertsApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
