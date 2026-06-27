@@ -6,15 +6,17 @@ class AlertsApiService {
 
   final Dio _dio;
 
-Future<Map<String, dynamic>> getActiveAlerts() async {
-  final response = await _dio.get(
-    ApiConstants.activeAlertsPath,
-  );
+  Future<Map<String, dynamic>> getActiveAlerts() async {
+    final response = await _dio.get<Map<String, dynamic>>
+    (ApiConstants.activeAlertsPath);
 
-  return response.data as Map<String, dynamic>;
-}
+    return response.data!;
+  }
 
-  Future<String> getRegionAlertStatus(String regionUid) {
-    throw UnimplementedError();
+  Future<String> getRegionAlertStatus(String regionUid) async {
+    final response = await _dio.get<String>
+    (ApiConstants.regionAlertPath(regionUid));
+
+    return response.data!;
   }
 }
