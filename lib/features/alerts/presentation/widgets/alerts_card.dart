@@ -7,6 +7,7 @@ class AlertCard extends StatelessWidget {
     required this.icon,
     super.key,
   });
+
   final String title;
   final String description;
   final IconData icon;
@@ -15,23 +16,27 @@ class AlertCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        boxShadow: [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 8,
-            offset: const Offset(0, 3),
+            offset: Offset(0, 3),
           ),
         ],
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, size: 30, color: Colors.redAccent),
-            const SizedBox(width: 8),
+            Icon(
+              icon,
+              size: 36,
+              color: Colors.redAccent,
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,10 +46,17 @@ class AlertCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(description, style: const TextStyle(fontSize: 14)),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.redAccent,
+                    ),
+                  ),
                 ],
               ),
             ),

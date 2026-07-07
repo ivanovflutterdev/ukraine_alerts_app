@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                   title: 'Alerts Map',
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (_) => const AlertsMapScreen(),
                       ),
                     );
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                   title: 'Region Alerts',
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<void>(
                         builder: (_) => const RegionAlertsScreen(),
                       ),
                     );

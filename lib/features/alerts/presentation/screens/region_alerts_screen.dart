@@ -1,113 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ukraine_alerts_app/core/di/service_locator.dart';
+import 'package:ukraine_alerts_app/features/alerts/domain/entities/region_entity.dart';
+import 'package:ukraine_alerts_app/features/alerts/domain/entities/regions_list.dart';
+import 'package:ukraine_alerts_app/features/alerts/presentation/cubit/region_alerts_cubit.dart';
+import 'package:ukraine_alerts_app/features/alerts/presentation/cubit/region_alerts_state.dart';
 
 enum AlertStatus { initial, loading, noAlert, alert }
 
-class RegionAlertsScreen extends StatelessWidget {
+class RegionAlertsScreen extends StatefulWidget {
   const RegionAlertsScreen({super.key});
 
-  final AlertStatus status = AlertStatus.initial;
+  @override
+  State<RegionAlertsScreen> createState() => _RegionAlertsScreenState();
+}
 
-  bool get hasAlert => status == AlertStatus.alert;
-
-  bool get isLoading => status == AlertStatus.loading;
-
-  bool get isInitial => status == AlertStatus.initial;
+class _RegionAlertsScreenState extends State<RegionAlertsScreen> {
+  RegionEntity? _selectedRegion;
 
   @override
   Widget build(BuildContext context) {
-    final appBarColor = switch (status) {
-      AlertStatus.initial => const Color(0xFFC7ECFA),
-      AlertStatus.loading => const Color(0xFFC7ECFA),
-      AlertStatus.noAlert => const Color(0xFF55C982),
-      AlertStatus.alert => const Color(0xFFC75A5A),
-    };
+    return BlocProvider(
+      create: (_) => getIt<RegionAlertsCubit>(),
+      child: BlocBuilder<RegionAlertsCubit, RegionAlertsState>(
+        builder: (context, state) {
+          final status = _mapStateToStatus(state);
+          final isInitialOrLoading =
+              status == AlertStatus.initial || status == AlertStatus.loading;
 
-    final backgroundDecoration = switch (status) {
-      AlertStatus.initial || AlertStatus.loading => const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 116, 183, 228),
-            Color.fromARGB(255, 186, 229, 247),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      AlertStatus.noAlert => const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF00A85A), Color(0xFF65F06E)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      AlertStatus.alert => const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFB00000), Color(0xFFFF2B2B)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-    };
+          final appBarColor = _getAppBarColor(status);
+          final backgroundDecoration = _getBackgroundDecoration(status);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: appBarColor,
-        centerTitle: true,
-        elevation: 0,
-        title: Text(
-          'Region Alerts',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: isInitial || isLoading ? Colors.black87 : Colors.white,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isInitial || isLoading ? Colors.black87 : Colors.white,
-        ),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.refresh)),
-        ],
-      ),
-      body: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: double.infinity,
-        decoration: backgroundDecoration,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: DropdownMenu<String>(
-                width: MediaQuery.of(context).size.width - 32,
-                enableSearch: true,
-                enableFilter: true,
-                hintText: 'Оберіть місто або регіон',
-                leadingIcon: const Icon(Icons.search),
-
-                inputDecorationTheme: const InputDecorationTheme(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                  ),
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: appBarColor,
+              centerTitle: true,
+              elevation: 0,
+              title: Text(
+                'Region Alerts',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isInitialOrLoading ? Colors.black87 : Colors.white,
                 ),
+              ),
+              iconTheme: IconThemeData(
+                color: isInitialOrLoading ? Colors.black87 : Colors.white,
+              ),
+              actions: [
+                IconButton(
+                  onPressed: _selectedRegion == null
+                      ? null
+                      : () {
+                          context
+                              .read<RegionAlertsCubit>()
+                              .loadRegionAlert(_selectedRegion!.uid);
+                        },
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            body: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: double.infinity,
+              decoration: backgroundDecoration,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: DropdownMenu<RegionEntity>(
+                      width: MediaQuery.of(context).size.width - 32,
+                      enableSearch: true,
+                      enableFilter: true,
+                      hintText: 'Оберіть місто або регіон',
+                      leadingIcon: const Icon(Icons.search),
+                      onSelected: (region) {
+                        if (region == null) return;
 
-                dropdownMenuEntries: const [
-                  DropdownMenuEntry(value: 'kyiv', label: 'Київ'),
-                  DropdownMenuEntry(
-                    value: 'kharkiv',
-                    label: 'Харківська область',
+                        setState(() {
+                          _selectedRegion = region;
+                        });
+
+                        context
+                            .read<RegionAlertsCubit>()
+                            .loadRegionAlert(region.uid);
+                      },
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                        ),
+                      ),
+                      dropdownMenuEntries: regionsList.map((region) {
+                        return DropdownMenuEntry<RegionEntity>(
+                          value: region,
+                          label: region.name,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: _StatusContent(status: status),
+                    ),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: Center(child: _StatusContent(status: status)),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
+  }
+
+  AlertStatus _mapStateToStatus(RegionAlertsState state) {
+    return switch (state) {
+      RegionAlertsInitial() => AlertStatus.initial,
+      RegionAlertsLoading() => AlertStatus.loading,
+      RegionAlertsLoaded(:final alert) =>
+        alert.isActive ? AlertStatus.alert : AlertStatus.noAlert,
+      RegionAlertsError() => AlertStatus.initial,
+    };
+  }
+
+  Color _getAppBarColor(AlertStatus status) {
+    return switch (status) {
+      AlertStatus.initial || AlertStatus.loading => const Color(0xFFC7ECFA),
+      AlertStatus.noAlert => const Color(0xFF55C982),
+      AlertStatus.alert => const Color(0xFFC75A5A),
+    };
+  }
+
+  BoxDecoration _getBackgroundDecoration(AlertStatus status) {
+    return switch (status) {
+      AlertStatus.initial || AlertStatus.loading => const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 116, 183, 228),
+              Color.fromARGB(255, 186, 229, 247),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      AlertStatus.noAlert => const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF00A85A), Color(0xFF65F06E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      AlertStatus.alert => const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFB00000), Color(0xFFFF2B2B)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+    };
   }
 }
 
@@ -162,7 +213,7 @@ class _StatusContent extends StatelessWidget {
             Icon(
               Icons.notifications_active_rounded,
               size: 120,
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
             ),
             const SizedBox(height: 16),
             const Padding(

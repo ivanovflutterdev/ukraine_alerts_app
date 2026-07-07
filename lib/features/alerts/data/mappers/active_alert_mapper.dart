@@ -4,7 +4,7 @@ import 'package:ukraine_alerts_app/features/alerts/domain/entities/alert_entity.
 extension ActiveAlertMapper on ActiveAlertDto {
   AlertEntity toEntity() {
     return AlertEntity(
-      regionName: locationTitle,
+      regionName: locationOblast,
       isActive: true,
       alertStartedAt: DateTime.tryParse(startedAt),
     );
